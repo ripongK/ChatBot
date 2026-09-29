@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แบบฝึกฝนเทียบเคียง PISA 2025 LDW — Chatbot มั่นคงวัสดุภัณฑ์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --concrete:#F1EDE4;
+    --concrete-dark:#E4DDCE;
+    --ink:#23201B;
+    --ink-soft:#5B564C;
+    --orange:#E1611B;
+    --orange-dark:#B84D12;
+    --steel:#2E5266;
+    --steel-light:#4B7A93;
+    --rebar:#8C8577;
+    --good:#3F7A4E;
+    --bad:#B0463D;
+    --paper:#FFFDF8;
+    --line:#D8D0BF;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--concrete);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:34px 34px;
+    color:var(--ink);
+    font-family:'IBM Plex Sans Thai', sans-serif;
+    line-height:1.65;
+    min-height:100vh;
+  }
+  h1,h2,h3,.display{font-family:'Kanit',sans-serif;}
+  .app{max-width:920px;margin:0 auto;padding:0 18px 60px;}
+
+  /* Top bar */
+  .topbar{
+    position:sticky;top:0;z-index:30;
+    background:var(--ink);
+    color:var(--concrete);
+    padding:10px 18px;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    border-bottom:4px solid var(--orange);
+  }
+  .topbar .brand{font-family:'Kanit';font-weight:700;font-size:15px;letter-spacing:.2px;display:flex;align-items:center;gap:8px;}
+  .topbar .who{margin-left:auto;font-size:13px;color:#D8D2C4;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .who b{color:#fff;}
+  .topbar .who{margin-right:18px;}
+  .timer{font-size:13px;color:#D8D2C4;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+  .timer b{font-family:'Kanit';font-size:18px;color:#fff;background:var(--steel);padding:1px 10px;border-radius:6px;font-variant-numeric:tabular-nums;}
+  .timer.warn b{background:var(--orange);}
+  .timer.over b{background:var(--bad);}
+  .who .tag{background:var(--steel);color:#fff;padding:2px 9px;border-radius:20px;font-size:12px;}
+  .progress-rail{display:flex;gap:4px;width:100%;margin-top:8px;}
+  .progress-rail .seg{flex:1;height:6px;border-radius:3px;background:#463F33;position:relative;overflow:hidden;}
+  .progress-rail .seg.done{background:var(--orange);}
+  .progress-rail .seg.current{background:linear-gradient(90deg,var(--orange) 50%,#463F33 50%);}
+  .progress-labels{display:flex;justify-content:space-between;font-size:10.5px;color:#B7AF9E;margin-top:4px;letter-spacing:.3px;}
+
+  /* Card */
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px 26px 22px;
+    margin-top:22px;
+    box-shadow:0 1px 0 rgba(35,32,27,.04);
+  }
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--orange-dark);font-weight:600;margin-bottom:6px;}
+  .eyebrow .dot{width:7px;height:7px;background:var(--orange);border-radius:50%;}
+  h2.section-title{font-size:23px;margin:0 0 4px;color:var(--ink);}
+  .subtitle{color:var(--ink-soft);font-size:14.5px;margin:0 0 16px;}
+
+  /* Buttons */
+  .btn{
+    font-family:'Kanit';font-weight:600;font-size:15px;
+    background:var(--orange);color:#fff;border:none;
+    padding:11px 22px;border-radius:6px;cursor:pointer;
+    transition:transform .08s ease, background .15s;
+  }
+  .btn:hover{background:var(--orange-dark);}
+  .btn:active{transform:scale(.98);}
+  .btn.secondary{background:transparent;color:var(--steel);border:1.5px solid var(--steel);}
+  .btn.secondary:hover{background:var(--steel);color:#fff;}
+  .btn:disabled{background:#C9C2B2;cursor:not-allowed;}
+  .btn-row{display:flex;justify-content:space-between;margin-top:24px;gap:10px;}
+
+  /* Form */
+  label.field-label{display:block;font-weight:600;font-size:14px;margin-bottom:6px;color:var(--ink);}
+  input[type=text], select, textarea{
+    width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:6px;
+    font-family:'IBM Plex Sans Thai';font-size:15px;background:#fff;color:var(--ink);
+  }
+  textarea{resize:vertical;min-height:90px;}
+  input[type=text]:focus, select:focus, textarea:focus{outline:2px solid var(--steel-light);border-color:var(--steel-light);}
+  .field{margin-bottom:18px;}
+
+  /* MCQ */
+  .qtext{font-size:16.5px;font-weight:600;margin:14px 0 12px;color:var(--ink);}
+  .options{display:flex;flex-direction:column;gap:9px;}
+  .opt{
+    display:flex;gap:10px;align-items:flex-start;
+    border:1.5px solid var(--line);border-radius:7px;padding:11px 13px;
+    cursor:pointer;background:#fff;transition:border-color .1s, background .1s;
+  }
+  .opt:hover{border-color:var(--steel-light);}
+  .opt.selected{border-color:var(--orange);background:#FDF1E9;}
+  .opt input{margin-top:3px;}
+  .qcounter{font-size:12.5px;color:var(--ink-soft);letter-spacing:.3px;}
+
+  /* Chart wrap */
+  .chart-wrap{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;margin:14px 0;}
+  .chart-wrap canvas{max-height:260px;}
+  .teach-box{background:var(--concrete-dark);border-left:4px solid var(--steel);padding:12px 15px;border-radius:0 6px 6px 0;font-size:14.5px;margin:12px 0;}
+
+  /* Chat bubbles hero */
+  .chat-demo{display:flex;flex-direction:column;gap:10px;margin:18px 0;}
+  .bubble{max-width:78%;padding:10px 14px;border-radius:14px;font-size:14.5px;position:relative;}
+  .bubble.user{align-self:flex-start;background:#fff;border:1.5px solid var(--line);border-bottom-left-radius:3px;}
+  .bubble.bot{align-self:flex-end;background:var(--steel);color:#fff;border-bottom-right-radius:3px;}
+  .bubble .intent-tag{display:inline-block;margin-top:6px;font-size:11px;background:var(--orange);color:#fff;padding:1px 8px;border-radius:10px;font-family:'Kanit';}
+
+  /* Apply activity */
+  .control{margin-bottom:16px;}
+  .control-head{display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:4px;}
+  .control-head .val{font-family:'Kanit';color:var(--orange-dark);}
+  input[type=range]{width:100%;accent-color:var(--orange);}
+  table.msg-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13.8px;}
+  table.msg-table th, table.msg-table td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;}
+  table.msg-table th{color:var(--ink-soft);font-weight:600;font-size:12.5px;text-transform:none;}
+  .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-family:'Kanit';font-weight:600;}
+  .pill.BUY{background:#FDE7DA;color:var(--orange-dark);}
+  .pill.PRICE{background:#DDEAF0;color:var(--steel);}
+  .pill.PRODUCT{background:#E4EEDF;color:var(--good);}
+  .pill.CLARIFY{background:#EFEAE0;color:var(--ink-soft);}
+  .row-ok{background:#F2F8F3;}
+  .row-bad{background:#FBEEEC;}
+  .accbar-wrap{margin-top:16px;background:var(--concrete-dark);border-radius:20px;height:14px;overflow:hidden;}
+  .accbar-fill{height:100%;background:var(--good);transition:width .25s;}
+  .acc-readout{display:flex;justify-content:space-between;margin-top:6px;font-size:13.5px;font-weight:600;}
+
+  /* Likert */
+  .likert-row{margin-bottom:20px;}
+  .likert-stmt{font-size:15px;font-weight:500;margin-bottom:8px;}
+  .likert-scale{display:flex;gap:8px;}
+  .likert-opt{flex:1;text-align:center;border:1.5px solid var(--line);border-radius:7px;padding:9px 4px;cursor:pointer;font-size:12.5px;background:#fff;}
+  .likert-opt.selected{border-color:var(--steel);background:#EAF1F4;color:var(--steel);font-weight:600;}
+
+  /* Report */
+  .score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0;}
+  .score-box{background:var(--concrete-dark);border-radius:8px;padding:14px 10px;text-align:center;}
+  .score-box .n{font-family:'Kanit';font-size:24px;font-weight:700;color:var(--steel);}
+  .score-box .l{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .level-banner{padding:18px;border-radius:8px;text-align:center;margin:14px 0;color:#fff;}
+  .level-banner .lv{font-family:'Kanit';font-size:26px;font-weight:700;}
+  .save-status{font-size:13px;color:var(--ink-soft);margin-top:10px;text-align:center;}
+  .hist-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12.8px;}
+  .hist-table th,.hist-table td{border-bottom:1px solid var(--line);padding:6px 5px;text-align:center;}
+  .hist-table th{background:var(--concrete-dark);}
+
+  .stripe{height:8px;background:repeating-linear-gradient(45deg,var(--ink) 0 10px, var(--orange) 10px 20px);border-radius:4px;margin:20px 0;}
+  footer{text-align:center;color:var(--ink-soft);font-size:12px;margin-top:30px;padding-bottom:10px;}
+  .icon{width:20px;height:20px;flex-shrink:0;}
+  @media(max-width:600px){
+    .score-grid{grid-template-columns:repeat(2,1fr);}
+    .bubble{max-width:88%;}
+  }
+
+  .phone{width:300px;max-width:100%;margin:22px auto;border:9px solid var(--ink);border-radius:34px;background:#EDE6DA;overflow:hidden;box-shadow:0 8px 24px rgba(35,32,27,.25);position:relative;}
+  .phone-notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:90px;height:16px;background:var(--ink);border-radius:0 0 12px 12px;z-index:2;}
+  .phone-status{background:var(--steel);color:#fff;font-size:11px;display:flex;justify-content:space-between;padding:5px 16px 3px;}
+  .phone-head{background:var(--steel);color:#fff;display:flex;gap:10px;align-items:center;padding:8px 14px 10px;}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:18px;}
+  .pname{font-family:'Kanit';font-weight:600;font-size:14px;line-height:1.2;}
+  .pstat{font-size:11px;color:#BFE3C5;}
+  .phone-body{padding:12px 10px;display:flex;flex-direction:column;gap:8px;min-height:260px;}
+  .msg{max-width:80%;padding:7px 11px;border-radius:14px;font-size:13.5px;line-height:1.45;}
+  .msg .t{display:block;font-size:9.5px;opacity:.6;text-align:right;margin-top:2px;}
+  .msg.me{align-self:flex-end;background:#DCF3D0;border-bottom-right-radius:3px;}
+  .msg.bot{align-self:flex-start;background:#fff;border-bottom-left-radius:3px;}
+  .msg .intent-tag{display:inline-block;margin-left:6px;font-size:11px;background:var(--orange);color:#fff;padding:1px 8px;border-radius:10px;font-family:'Kanit';}
+  .phone-input{display:flex;gap:8px;padding:8px 10px;background:#fff;border-top:1px solid var(--line);}
+  .fake-input{flex:1;background:var(--concrete);border-radius:16px;padding:6px 12px;font-size:12.5px;color:var(--rebar);}
+  .send{width:30px;height:30px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;}
+
+  /* --- Scratch-like command blocks --- */
+  .blocks-hint{font-size:13px;color:var(--ink-soft);background:var(--concrete);border-radius:6px;padding:9px 12px;margin:12px 0;}
+  .blocks-layout{display:grid;grid-template-columns:1fr 1.15fr;gap:16px;align-items:start;}
+  .col-head{font-size:14px;margin:0 0 8px;color:var(--ink-soft);font-weight:600;}
+  .palette,.script{background:var(--concrete);border:1px dashed var(--line);border-radius:8px;padding:12px 10px;min-height:120px;}
+  .sblock{
+    position:relative;cursor:grab;user-select:none;
+    color:#fff;font-size:13.2px;line-height:1.4;font-weight:500;
+    padding:11px 13px 11px 15px;margin:0 0 14px;border-radius:6px;
+    box-shadow:0 2px 0 rgba(0,0,0,.22);
+  }
+  .sblock:last-child{margin-bottom:4px;}
+  .sblock::before{content:'';position:absolute;top:-6px;left:16px;width:20px;height:7px;background:inherit;border-radius:3px 3px 0 0;}
+  .sblock::after{content:'';position:absolute;bottom:-7px;left:16px;width:20px;height:7px;background:inherit;border-radius:0 0 4px 4px;box-shadow:0 2px 0 rgba(0,0,0,.18);}
+  .sblock.cond{background:#E0A32E;}
+  .sblock.act{background:#4C97D6;}
+  .sblock.else{background:#CF63CF;}
+  .sblock.picked{outline:3px solid var(--ink);outline-offset:2px;}
+  .sblock:active{cursor:grabbing;}
+  .sblock.in-slot{margin:0;}
+  .sblock.in-slot::after{display:none;}
+  .slot-row{margin-bottom:12px;}
+  .slot-label{font-size:11.5px;color:var(--ink-soft);margin-bottom:3px;}
+  .slot{border:2px dashed var(--rebar);border-radius:7px;min-height:46px;padding:5px;background:#FFFDF8;display:flex;align-items:center;}
+  .slot.filled{border-style:solid;border-color:transparent;background:transparent;padding:0;}
+  .slot.filled .sblock{width:100%;}
+  .slot.over{border-color:var(--orange);background:#FDF1E9;}
+  .slot.ready:not(.filled){border-color:var(--orange);}
+  .slot-empty{font-size:12.5px;color:var(--rebar);padding-left:8px;}
+  .empty-note{font-size:12.5px;color:var(--rebar);text-align:center;padding:14px 0;}
+  @media(max-width:700px){ .blocks-layout{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div id="topbar" class="topbar" style="display:none;">
+  <div class="brand">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v10H8l-4 4V5z"/></svg>
+    Chatbot RiskGuard · มั่นคงวัสดุภัณฑ์
+  </div>
+  <div class="who" id="whoBox"></div>
+  <div class="timer" id="timerBox">เหลือเวลา <b id="timerVal">30:00</b></div>
+  <div style="width:100%;">
+    <div class="progress-rail" id="progressRail"></div>
+    <div class="progress-labels"><span>SHOW</span><span>LEARN</span><span>APPLY</span><span>REFLECT</span><span>REPORT</span></div>
+  </div>
+</div>
+
+<div class="app">
+  <div id="screen"></div>
+  <footer>แบบฝึกฝนเทียบเคียงกรอบการประเมิน PISA 2025 — Learning in the Digital World (LDW) · สถานการณ์จำลอง ไม่ใช่เครื่องมือให้บริการจริง</footer>
+</div>
+
+<script>
+/* ============================= DATA ============================= */
+
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwj6yK7LCtTc_90VHpl2GndYSnYGgUA-B94dksZIxwk_Q9ZVcNx8cnEL2yJ8k3QvBjs/exec";
+const GRADE_OPTIONS = ["ชั้นมัธยมศึกษาปีที่ 2","ชั้นมัธยมศึกษาปีที่ 3","ชั้นมัธยมศึกษาปีที่ 4","ปวช."];
+
+const state = {
+  screen:"intro",
+  name:"",
+  grade:"",
+  showIdx:0, showAnswers:[null,null,null,null,null],
+  learnIdx:0, learnAnswers:[null,null,null,null,null,null,null],
+  applyIdx:0, applyResults:[null,null,null,null,null], // locked accuracy per activity (0-1)
+  applyState:{}, // live control values per activity
+  reflectLikert:[null,null,null,null],
+  reflectOpen:["",""],
+  saving:false, saveMsg:"", history:[]
+};
+
+const SHOW_Q = [
+ { q:"Chatbot ในบริบทของร้านค้าออนไลน์ทำหน้าที่อะไรเป็นหลัก?",
+   opts:["เก็บภาษีสินค้าให้ร้านค้าโดยอัตโนมัติ","โต้ตอบกับลูกค้าด้วยข้อความแทนพนักงานได้ตลอดเวลา","จัดส่งสินค้าให้ลูกค้าโดยไม่ต้องใช้พนักงานขนส่ง","คำนวณภาษีนำเข้าสินค้าวัสดุก่อสร้าง"], correct:1},
+ { q:"คำว่า “Intent” ในระบบแชทบอท หมายถึงสิ่งใด?",
+   opts:["รหัสสินค้าที่ลูกค้าต้องการซื้อ","ความตั้งใจหรือเป้าหมายที่แท้จริงของข้อความที่ผู้ใช้พิมพ์เข้ามา","จำนวนตัวอักษรในข้อความของลูกค้า","ชื่อผู้ดูแลระบบแชทบอท"], correct:1},
+ { q:"เพราะเหตุใดระบบจึงควรคำนวณ “คะแนน” รวมของคำบ่งชี้ทั้งประโยค แทนที่จะตัดสินจากคำแรกที่พบเพียงคำเดียว?",
+   opts:["เพื่อให้ประมวลผลเร็วขึ้นโดยไม่ต้องอ่านทั้งประโยค","เพราะคำแรกในประโยคภาษาไทยมักไม่มีความหมาย","เพื่อพิจารณาน้ำหนักของคำบ่งชี้ทุกคำร่วมกัน ลดโอกาสตัดสินใจผิดจากคำเดียว","เพื่อลดจำนวนคำที่ต้องเก็บในฐานข้อมูล"], correct:2},
+ { q:"จากกราฟแสดงจำนวนข้อความที่ลูกค้าถามในแต่ละหมวด (ซื้อ 40, ถามราคา 55, ถามรายการสินค้า 25) หมวดใดที่ลูกค้าถามมากที่สุด?",
+   opts:["ถามซื้อสินค้า","ถามราคาสินค้า","ถามรายการสินค้า","มากเท่ากันทุกหมวด"], correct:1, chart:{labels:["ซื้อสินค้า","ถามราคา","ถามรายการสินค้า"],data:[40,55,25]}},
+ { q:"เหตุใดข้อความภาษาถิ่นหรือคำสะกดผิด เช่น “มีปูนก่อขายบ่” จึงเป็นความท้าทายของแชทบอท?",
+   opts:["เพราะลูกค้าพิมพ์เร็วเกินไปจนระบบประมวลผลไม่ทัน","เพราะคำเหล่านี้ไม่ตรงกับรูปแบบมาตรฐานที่ระบบถูกฝึกให้จดจำ จึงอาจตรวจไม่พบคำบ่งชี้","เพราะภาษาถิ่นมีตัวอักษรมากกว่าภาษามาตรฐาน","เพราะระบบไม่อนุญาตให้พิมพ์ภาษาถิ่น"], correct:1},
+];
+
+const LEARN_TASKS = [
+ { title:"ภาระงานที่ 1 · น้ำหนักคะแนนของคำบ่งชี้ Intent",
+   teach:"ระบบให้คะแนนคำหรือคุณลักษณะที่ตรวจพบในข้อความ 5 ประเภท: คำที่แสดงความต้องการซื้อ (+3), คำเกี่ยวกับราคา (+3), คำเกี่ยวกับรายการสินค้า (+3), คำระบุสินค้า เช่น ปูน/เหล็ก/อิฐ (+1), และจำนวนสินค้าที่ต้องการ เช่น “5 ถุง” (+2) — สังเกตว่าคำระบุสินค้าเพียงคำเดียวมีน้ำหนักน้อยที่สุด เพราะบอกได้แค่ว่ากำลังพูดถึงสินค้าอะไร แต่ยังไม่บอกว่าลูกค้าต้องการอะไรกับสินค้านั้น",
+   chart:{type:"bar",labels:["ต้องการซื้อ","ราคา","รายการสินค้า","ระบุสินค้า","จำนวนสินค้า"],data:[3,3,3,1,2],color:"#E1611B"},
+   q:"จากกราฟน้ำหนักคะแนน คำบ่งชี้ประเภทใดมีน้ำหนักคะแนนน้อยที่สุด?",
+   opts:["คำที่แสดงความต้องการซื้อ","คำเกี่ยวกับราคา","คำระบุสินค้า","จำนวนสินค้าที่ต้องการ"], correct:2},
+ { title:"ภาระงานที่ 2 · การคำนวณ Intent Score ทีละขั้น",
+   teach:"ลองไล่คำนวณข้อความ “เอาปูน 5 ถุงครับ” ทีละคำ: พบ “เอา” → BUY +3, พบ “ปูน” (คำระบุสินค้า) → +1 สะสมเป็น 4, พบ “5 ถุง” (จำนวนสินค้า) → +2 สะสมเป็น 6 ส่วน PRICE และ PRODUCT ไม่มีคำบ่งชี้เลยจึงเป็น 0 ระบบจึงเลือก BUY",
+   chart:{type:"line",labels:["เริ่มต้น","หลังพบ “เอา”","หลังพบ “ปูน”","หลังพบ “5 ถุง”"],data:[0,3,4,6],color:"#2E5266"},
+   q:"จากกราฟคะแนนสะสมของข้อความ “เอาปูน 5 ถุงครับ” คะแนน BUY รวมสุดท้ายเท่ากับเท่าใด?",
+   opts:["4","5","6","7"], correct:2},
+ { title:"ภาระงานที่ 3 · ภาษาพูด ภาษาถิ่น และคำสะกดผิด",
+   teach:"ลูกค้าอาจพิมพ์ด้วยภาษาพูด ภาษาถิ่น หรือสะกดคลาดเคลื่อน เช่น “บ่” แทน “ไหม”, “หยัง” แทน “อะไร”, หรือพิมพ์ติดกันโดยไม่เว้นวรรค หากพจนานุกรมคำบ่งชี้ของระบบครอบคลุมเฉพาะภาษามาตรฐาน ระบบจะจดจำคำเหล่านี้ไม่ได้เลย การขยายพจนานุกรมให้ครอบคลุมคำท้องถิ่นและคำสะกดผิดจึงช่วยเพิ่มจำนวนข้อความที่ระบบตรวจพบคำบ่งชี้ได้ถูกต้อง",
+   chart:{type:"bar",labels:["ระดับ 0: มาตรฐาน","ระดับ 1: + ภาษาถิ่นทั่วไป","ระดับ 2: + ภาษาถิ่นเฉพาะภาค","ระดับ 3: + คำสะกดผิด/พิมพ์ติดกัน"],data:[3,5,7,8],color:"#3F7A4E"},
+   q:"จากกราฟ หากขยายพจนานุกรมจากระดับ “มาตรฐานเท่านั้น” ไปจนถึงระดับที่ครอบคลุมคำสะกดผิดด้วย จำนวนข้อความที่ระบบจดจำคำบ่งชี้ได้เปลี่ยนแปลงอย่างไร?",
+   opts:["ลดลงจาก 8 เหลือ 3","เพิ่มขึ้นจาก 3 เป็น 8","คงที่ตลอดทุกระดับ","เพิ่มขึ้นแล้วลดลง"], correct:1},
+ { title:"ภาระงานที่ 4 · กฎการตัดสินใจเลือก Intent",
+   teach:"เมื่อคำนวณคะแนนทั้ง 3 Intent แล้ว ระบบเลือก Intent ที่มีคะแนนสูงสุด โดยต้องสูงกว่าอีกสอง Intent ทั้งคู่ เช่น ข้อความ “เอาปูน 5 ถุงครับ” → BUY ชนะขาด, “ปูนกี่บาท” → PRICE ชนะขาด, “มีปูนขายไหม” → PRODUCT ชนะขาด",
+   chart:{type:"grouped",labels:["เอาปูน 5 ถุงครับ","ปูนกี่บาท","มีปูนขายไหม"],series:[
+      {name:"BUY",data:[6,0,1],color:"#E1611B"},
+      {name:"PRICE",data:[0,3,0],color:"#2E5266"},
+      {name:"PRODUCT",data:[0,0,3],color:"#3F7A4E"}]},
+   q:"ตามกฎการตัดสินใจ ถ้า PRICE Score มีค่าสูงกว่า BUY Score และสูงกว่า PRODUCT Score ทั้งคู่ ระบบจะเลือก Intent ใด?",
+   opts:["BUY","PRICE","PRODUCT","ถามผู้ใช้เพิ่มเติมเสมอ"], correct:1},
+ { title:"ภาระงานที่ 5 · เมื่อคะแนนเสมอกัน (Tie)",
+   teach:"หากคะแนนสูงสุดมีมากกว่า 1 Intent เท่ากัน (เช่น ข้อความ “ปูนนี้ดีไหม น่าซื้อป่าว” อาจให้คะแนน BUY และ PRODUCT เท่ากัน) ระบบไม่ควรเดา Intent เอง เพราะเสี่ยงตอบผิดทาง แต่ควรส่งข้อความถามผู้ใช้เพิ่มเติมเพื่อความชัดเจน",
+   chart:{type:"bar",labels:["BUY","PRICE","PRODUCT"],data:[3,0,3],color:"#8C8577"},
+   q:"จากกราฟ ถ้า BUY Score เท่ากับ PRODUCT Score และทั้งคู่สูงกว่า PRICE Score ระบบควรทำอย่างไรตามกฎการตัดสินใจ?",
+   opts:["เลือก BUY เพราะมาก่อนตามลำดับ","เลือก PRODUCT เพราะเป็นสินค้าที่ขาย","ส่งข้อความถามผู้ใช้เพิ่มเติม","เลือกทั้ง BUY และ PRODUCT พร้อมกัน"], correct:2},
+ { title:"ภาระงานที่ 6 · ประกอบบล็อกคำสั่ง “กฎการตัดสินใจเลือก Intent”",
+   type:"blocks",
+   teach:"นำกฎการตัดสินใจที่เรียนมาในภาระงานที่ 4 และ 5 มาเขียนเป็นชุดคำสั่ง ลากบล็อกจากกล่องบล็อกด้านล่างมาวางในช่องว่างให้เรียงลำดับถูกต้อง สังเกตว่าเงื่อนไขของแต่ละ Intent ต้องตรวจสอบให้ชนะทั้งสอง Intent ที่เหลือ และต้องมีทางออกสุดท้ายสำหรับกรณีที่ยังตัดสินใจไม่ได้ (มีบล็อกลวงปนอยู่ 2 บล็อก ไม่ต้องใช้ทุกบล็อก)",
+   slots:[
+     {label:"เงื่อนไขที่ 1", ans:"b1"},
+     {label:"ทำเมื่อเงื่อนไขที่ 1 เป็นจริง", ans:"b2"},
+     {label:"เงื่อนไขที่ 2", ans:"b3"},
+     {label:"ทำเมื่อเงื่อนไขที่ 2 เป็นจริง", ans:"b4"},
+     {label:"เงื่อนไขที่ 3", ans:"b5"},
+     {label:"ทำเมื่อเงื่อนไขที่ 3 เป็นจริง", ans:"b6"},
+     {label:"กรณีอื่นทั้งหมด", ans:"b7"}
+   ],
+   blocks:[
+     {id:"b1", kind:"cond", text:"ถ้า BUY Score &gt; PRICE Score และ BUY Score &gt; PRODUCT Score"},
+     {id:"b2", kind:"act",  text:"เลือก Intent เป็น BUY"},
+     {id:"b3", kind:"cond", text:"มิฉะนั้น ถ้า PRICE Score &gt; BUY Score และ PRICE Score &gt; PRODUCT Score"},
+     {id:"b4", kind:"act",  text:"เลือก Intent เป็น PRICE"},
+     {id:"b5", kind:"cond", text:"มิฉะนั้น ถ้า PRODUCT Score &gt; BUY Score และ PRODUCT Score &gt; PRICE Score"},
+     {id:"b6", kind:"act",  text:"เลือก Intent เป็น PRODUCT"},
+     {id:"b7", kind:"else", text:"มิฉะนั้น ส่งข้อความถามผู้ใช้เพิ่มเติม"},
+     {id:"d1", kind:"cond", text:"ถ้า BUY Score เท่ากับ PRICE Score"},
+     {id:"d2", kind:"act",  text:"เลือก Intent ที่มีคะแนนน้อยที่สุด"}
+   ]},
+ { title:"ภาระงานที่ 7 · เขียนบล็อกคำสั่ง If–Then–Else ตรวจสอบสต็อกสินค้า",
+   type:"blocks",
+   teach:"เมื่อ Chatbot ตัดสินใจได้แล้วว่า Intent คือ BUY ระบบต้องตรวจสอบต่อว่ามีสินค้าพอขายหรือไม่ก่อนยืนยันคำสั่งซื้อ ลากบล็อกมาประกอบเป็นโครงสร้าง if–then–else ให้ครบ: ต้องรับจำนวนที่ลูกค้าสั่งก่อน แล้วเปรียบเทียบกับจำนวนในคลัง ถ้าพอจึงยืนยัน ถ้าไม่พอต้องแจ้งและเสนอทางเลือกแทนการยืนยันคำสั่งซื้อ (มีบล็อกลวงปนอยู่ 2 บล็อก ไม่ต้องใช้ทุกบล็อก)",
+   slots:[
+     {label:"ขั้นที่ 1 — รับข้อมูล", ans:"c1"},
+     {label:"ขั้นที่ 2 — เงื่อนไข (if)", ans:"c2"},
+     {label:"ขั้นที่ 3 — then", ans:"c3"},
+     {label:"ขั้นที่ 4 — then (ต่อ)", ans:"c4"},
+     {label:"ขั้นที่ 5 — else", ans:"c5"},
+     {label:"ขั้นที่ 6 — else (ต่อ)", ans:"c6"}
+   ],
+   blocks:[
+     {id:"c1", kind:"act",  text:"รับค่า “จำนวนที่ลูกค้าสั่ง” จากข้อความของลูกค้า"},
+     {id:"c2", kind:"cond", text:"ถ้า จำนวนในคลัง &ge; จำนวนที่ลูกค้าสั่ง"},
+     {id:"c3", kind:"act",  text:"ยืนยันคำสั่งซื้อ และตัดสต็อกตามจำนวนที่สั่ง"},
+     {id:"c4", kind:"act",  text:"ตอบลูกค้าพร้อมยอดรวมและวิธีจัดส่ง"},
+     {id:"c5", kind:"else", text:"มิฉะนั้น (จำนวนในคลังไม่พอ)"},
+     {id:"c6", kind:"act",  text:"แจ้งจำนวนที่มีอยู่จริง และเสนอให้สั่งจองส่วนที่ขาด"},
+     {id:"e1", kind:"act",  text:"ยืนยันคำสั่งซื้อทันทีโดยไม่ตรวจสอบจำนวนในคลัง"},
+     {id:"e2", kind:"act",  text:"ปิดการสนทนาโดยไม่ตอบกลับลูกค้า"}
+   ]},
+];
+
+function decide(scores, margin){
+  const entries = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+  const top = entries[0][1], second = entries[1][1];
+  return (top - second) > margin ? entries[0][0] : "CLARIFY";
+}
+
+// ---- Apply Activity 1 : feature weights (BUY/PRICE/PRODUCT) ----
+const A1_MSGS = [
+ {text:"เอาปูน 5 ถุงครับ", b:1,p:0,q:0,i:1,t:1, true:"BUY"},
+ {text:"ปูนถุงละกี่บาทครับ", b:0,p:1,q:0,i:1,t:0, true:"PRICE"},
+ {text:"ร้านมีปูนอะไรบ้าง", b:0,p:0,q:1,i:1,t:0, true:"PRODUCT"},
+ {text:"ขอเหล็ก 10 เส้น", b:1,p:0,q:0,i:1,t:1, true:"BUY"},
+ {text:"เหล็กเส้นราคาเท่าไหร่", b:0,p:1,q:0,i:1,t:0, true:"PRICE"},
+ {text:"มีสีกี่ยี่ห้อ", b:0,p:0,q:1,i:1,t:0, true:"PRODUCT"},
+ {text:"ซื้อทราย 3 กระสอบ", b:1,p:0,q:0,i:1,t:1, true:"BUY"},
+ {text:"ร้านขายอิฐกี่แบบ", b:0,p:0,q:1,i:1,t:0, true:"PRODUCT"},
+];
+function a1_score(m, c){
+  return {BUY: m.b*c.wBuy + m.i*c.wItem + m.t*c.wQty, PRICE: m.p*c.wPrice, PRODUCT: m.q*c.wProduct};
+}
+
+// ---- Apply Activity 2 : quantity-boost sensitivity ----
+const A2_MSGS = [
+ {text:"เอาปูน 5 ถุงครับ", b:1,p:0,i:1,t:1, true:"BUY"},
+ {text:"ปูน 5 ถุงราคาเท่าไหร่", b:0,p:1,i:1,t:1, true:"PRICE"},
+ {text:"ขอเหล็ก 3 เส้น", b:1,p:0,i:1,t:1, true:"BUY"},
+ {text:"เหล็ก 3 เส้นราคาเท่าไหร่", b:0,p:1,i:1,t:1, true:"PRICE"},
+ {text:"ซื้อทราย 2 กระสอบ", b:1,p:0,i:1,t:1, true:"BUY"},
+ {text:"ทราย 2 กระสอบราคาเท่าไร", b:0,p:1,i:1,t:1, true:"PRICE"},
+ {text:"อยากได้สี 4 กระป๋อง", b:1,p:0,i:1,t:1, true:"BUY"},
+ {text:"สี 4 กระป๋องราคาเท่าไหร่", b:0,p:1,i:1,t:1, true:"PRICE"},
+];
+function a2_score(m, wQty){
+  return {BUY: m.b*3 + m.i*1 + m.t*wQty, PRICE: m.p*3, PRODUCT: 0};
+}
+
+// ---- Apply Activity 3 : dialect dictionary tier ----
+const A3_MSGS = [
+ {text:"ปูนถุงละกี่บาทครับ (ภาษามาตรฐาน)", tier:0, true:"PRICE"},
+ {text:"มีปูนก่อขายบ่ (อีสาน)", tier:1, true:"PRODUCT"},
+ {text:"เอาปูนก่อ 5 ถุงครับ (ภาษามาตรฐาน)", tier:0, true:"BUY"},
+ {text:"ปูนก่อจักโลราคาห่าใด (เหนือ)", tier:2, true:"PRICE"},
+ {text:"มีปูนหยังบ้าง (เหนือ)", tier:2, true:"PRODUCT"},
+ {text:"เอาปูน5ถุง (พิมพ์ติดกัน)", tier:3, true:"BUY"},
+ {text:"ปูนกี่บาท (ภาษามาตรฐาน)", tier:0, true:"PRICE"},
+ {text:"มีปูนขายมั้ย (ภาษาพูด)", tier:1, true:"PRODUCT"},
+];
+function a3_score(m, dictTier){
+  const s = {BUY:0,PRICE:0,PRODUCT:0};
+  if(dictTier >= m.tier) s[m.true] = 3;
+  return s;
+}
+
+// ---- Apply Activity 4 : confidence margin ----
+const A4_MSGS = [
+ {text:"เอาปูน 5 ถุง แล้วก็เหล็ก 2 เส้นด้วยครับ", s:{BUY:6,PRICE:0,PRODUCT:0}, true:"BUY"},
+ {text:"ปูนราคาถุงละเท่าไหร่ครับ", s:{BUY:0,PRICE:3,PRODUCT:0}, true:"PRICE"},
+ {text:"ร้านมีสีกี่ยี่ห้อ มีแบบไหนบ้าง", s:{BUY:0,PRICE:0,PRODUCT:4}, true:"PRODUCT"},
+ {text:"ปูนนี่ซื้อดีไหม", s:{BUY:2,PRICE:1,PRODUCT:0}, true:"CLARIFY"},
+ {text:"เอาปูนเลยครับ ราคาก็โอเคอยู่", s:{BUY:5,PRICE:3,PRODUCT:0}, true:"BUY"},
+ {text:"ปูนกับเหล็กแบบไหนดีกว่ากัน", s:{BUY:1,PRICE:1,PRODUCT:0}, true:"CLARIFY"},
+ {text:"เอาปูนก่อดีกว่า ร้านมีกี่ยี่ห้อ", s:{BUY:4,PRICE:0,PRODUCT:2}, true:"BUY"},
+ {text:"ปูนนี้มีกี่แบบ แบบไหนดีกว่ากัน", s:{BUY:2,PRICE:0,PRODUCT:3}, true:"CLARIFY"},
+ {text:"ราคาปูนถุงนี้เท่าไหร่ มีรุ่นพรีเมียมไหม", s:{BUY:0,PRICE:5,PRODUCT:2}, true:"PRICE"},
+ {text:"ปูนตรานี้เป็นยังไงบ้าง", s:{BUY:3,PRICE:3,PRODUCT:3}, true:"CLARIFY"},
+];
+
+// ---- Apply Activity 5 : capstone (all parameters) ----
+const A5_MSGS = [
+ {text:"เอาปูน 5 ถุงครับ", b:1,p:0,q:0,i:1,t:1, true:"BUY"},
+ {text:"ปูนกี่บาท", b:0,p:1,q:0,i:1,t:0, true:"PRICE"},
+ {text:"มีปูนกี่ยี่ห้อ", b:0,p:0,q:1,i:1,t:0, true:"PRODUCT"},
+ {text:"ขอเหล็ก 4 เส้น", b:1,p:0,q:0,i:1,t:1, true:"BUY"},
+ {text:"เหล็ก 4 เส้นราคาเท่าไหร่", b:0,p:1,q:0,i:1,t:1, true:"PRICE"},
+ {text:"ร้านมีสีอะไรบ้าง", b:0,p:0,q:1,i:1,t:0, true:"PRODUCT"},
+ {text:"ซื้อทราย 2 กระสอบ", b:1,p:0,q:0,i:1,t:1, true:"BUY"},
+ {text:"ทราย 2 กระสอบราคาเท่าไร", b:0,p:1,q:0,i:1,t:1, true:"PRICE"},
+ {text:"ขายอิฐกี่แบบ", b:0,p:0,q:1,i:1,t:0, true:"PRODUCT"},
+ {text:"ปูน 5 ถุง (พิมพ์ลอย ๆ ไม่มีคำสั่งชัดเจน)", b:0,p:0,q:0,i:1,t:1, true:"CLARIFY"},
+ {text:"ปูนซื้อดีไหม ราคาถูกป่าว", b:1,p:1,q:0,i:1,t:0, true:"CLARIFY"},
+ {text:"สวัสดีครับ มีคนอยู่ไหม", b:0,p:0,q:0,i:0,t:0, true:"CLARIFY"},
+];
+function a5_score(m,c){
+  return {BUY: m.b*c.wBuy + m.i*c.wItem + m.t*c.wQty, PRICE: m.p*c.wPrice, PRODUCT: m.q*c.wProduct};
+}
+
+const APPLY_ACTIVITIES = [
+ { id:"a1", title:"กิจกรรมที่ 1 · ปรับน้ำหนักคำบ่งชี้พื้นฐาน",
+   desc:"ปรับน้ำหนักของคำที่แสดงความต้องการซื้อ คำเกี่ยวกับราคา และคำเกี่ยวกับรายการสินค้า ให้ระบบจำแนก Intent ของทั้ง 8 ข้อความได้ถูกต้องทั้งหมด (คำระบุสินค้า +1 และจำนวนสินค้า +2 คงที่ ผูกกับ BUY เท่านั้น)",
+   defaults:{wBuy:2,wPrice:3,wProduct:1,wItem:1,wQty:2,margin:0},
+   controls:[{k:"wBuy",l:"น้ำหนัก: คำที่แสดงความต้องการซื้อ",min:1,max:5,step:1},
+             {k:"wPrice",l:"น้ำหนัก: คำเกี่ยวกับราคา",min:1,max:5,step:1},
+             {k:"wProduct",l:"น้ำหนัก: คำเกี่ยวกับรายการสินค้า",min:1,max:5,step:1}],
+   msgs:A1_MSGS, scoreFn:(m,c)=>a1_score(m,c) },
+ { id:"a2", title:"กิจกรรมที่ 2 · ความไวของสัญญาณ “จำนวนสินค้า”",
+   desc:"ทุกข้อความมีคำระบุสินค้าและจำนวนสินค้าปนอยู่ ปรับน้ำหนักของ “จำนวนสินค้า” ให้พอดี ไม่มากจนกลบคำถามราคาไปกลายเป็นคำสั่งซื้อ",
+   defaults:{wQty:6},
+   controls:[{k:"wQty",l:"น้ำหนัก: จำนวนสินค้า",min:0,max:6,step:1}],
+   msgs:A2_MSGS, scoreFn:(m,c)=>a2_score(m,c.wQty) },
+ { id:"a3", title:"กิจกรรมที่ 3 · ขยายพจนานุกรมภาษาถิ่น/คำสะกดผิด",
+   desc:"ขยายระดับพจนานุกรมคำบ่งชี้ให้ครอบคลุมภาษาถิ่นและคำสะกดผิด เพื่อให้ระบบตรวจพบคำบ่งชี้ในทุกข้อความได้ถูกต้อง",
+   defaults:{dictTier:0},
+   controls:[{k:"dictTier",l:"ระดับพจนานุกรม (0=มาตรฐานเท่านั้น, 3=ครอบคลุมสุด)",min:0,max:3,step:1}],
+   msgs:A3_MSGS, scoreFn:(m,c)=>a3_score(m,c.dictTier) },
+ { id:"a4", title:"กิจกรรมที่ 4 · ค่าความมั่นใจขั้นต่ำ (Margin)",
+   desc:"แต่ละข้อความมีคะแนน BUY/PRICE/PRODUCT ที่คำนวณไว้ให้แล้ว ปรับ “ค่าความมั่นใจขั้นต่ำ” — ผลต่างของคะแนนอันดับ 1 กับอันดับ 2 ต้องมากกว่าค่านี้ ระบบจึงจะตัดสินใจเลือก Intent แทนการถามเพิ่มเติม",
+   defaults:{margin:0},
+   controls:[{k:"margin",l:"ค่าความมั่นใจขั้นต่ำ (Margin)",min:0,max:4,step:1}],
+   msgs:A4_MSGS, scoreFn:(m,c)=>m.s, rawScore:true },
+ { id:"a5", title:"กิจกรรมที่ 5 · ภารกิจรวม: ปรับทุกพารามิเตอร์พร้อมกัน",
+   desc:"นำสิ่งที่ฝึกมาทั้งหมดมาใช้พร้อมกัน: น้ำหนักคำบ่งชี้ 3 ประเภท น้ำหนักคำระบุสินค้า น้ำหนักจำนวนสินค้า และค่าความมั่นใจขั้นต่ำ กับชุดข้อความ 12 รายการที่รวมกรณีกำกวมไว้ด้วย",
+   defaults:{wBuy:2,wPrice:3,wProduct:1,wItem:1,wQty:5,margin:0},
+   controls:[{k:"wBuy",l:"น้ำหนัก: ต้องการซื้อ",min:1,max:5,step:1},
+             {k:"wPrice",l:"น้ำหนัก: ราคา",min:1,max:5,step:1},
+             {k:"wProduct",l:"น้ำหนัก: รายการสินค้า",min:1,max:5,step:1},
+             {k:"wItem",l:"น้ำหนัก: คำระบุสินค้า",min:0,max:2,step:1},
+             {k:"wQty",l:"น้ำหนัก: จำนวนสินค้า",min:0,max:5,step:1},
+             {k:"margin",l:"ค่าความมั่นใจขั้นต่ำ (Margin)",min:0,max:4,step:1}],
+   msgs:A5_MSGS, scoreFn:(m,c)=>a5_score(m,c) },
+];
+
+const REFLECT_LIKERT = [
+ "ฉันเข้าใจว่า Intent Score คำนวณมาจากผลรวมคะแนนของคำบ่งชี้ต่าง ๆ ในข้อความ",
+ "ฉันสามารถอธิบายได้ว่าทำไมข้อความที่มีคะแนนเสมอกันจึงไม่ควรให้ระบบเดา Intent เอง",
+ "ฉันมั่นใจว่าจะสามารถปรับพารามิเตอร์ (น้ำหนัก/ค่าความมั่นใจขั้นต่ำ) ของระบบให้ทำงานแม่นยำขึ้นได้",
+ "ฉันตระหนักว่าการรองรับภาษาถิ่นและคำสะกดผิดมีผลต่อความแม่นยำและความเป็นธรรมของแชทบอทต่อลูกค้าทุกกลุ่ม",
+];
+const LIKERT_LABELS = ["ไม่เห็นด้วยอย่างยิ่ง","ไม่เห็นด้วย","เห็นด้วย","เห็นด้วยอย่างยิ่ง"];
+
+const REFLECT_OPEN = [
+ "หากลูกค้าพิมพ์ข้อความภาษาถิ่นปนกัน เช่น “ปูนมีก่อไหม ราคาห่าใด” นักเรียนคิดว่า Chatbot ควรจัดการอย่างไรหากตรวจพบว่าคะแนนยังไม่ชัดเจนพอ เพราะเหตุใด",
+ "ถ้า Chatbot ตัดสินใจ Intent ผิดพลาดบ่อยครั้งกับลูกค้าที่ใช้ภาษาถิ่น จะส่งผลอย่างไรต่อร้านค้าและลูกค้ากลุ่มนั้น และนักเรียนจะปรับปรุงระบบอย่างไรเพื่อลดผลกระทบนี้",
+];
+
+/* ============================= HELPERS ============================= */
+const $ = sel => document.querySelector(sel);
+function el(html){ const d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
+
+function updateTopbar(){
+  const tb = $('#topbar');
+  if(state.screen==='intro'){ tb.style.display='none'; return; }
+  tb.style.display='flex';
+  $('#whoBox').innerHTML = `<span><b>${escapeHtml(state.name)}</b></span><span class="tag">${escapeHtml(state.grade)}</span>`;
+  const order = ['show','learn','apply','reflect','report'];
+  const curIdx = order.indexOf(state.screen);
+  const rail = $('#progressRail'); rail.innerHTML='';
+  order.forEach((s,i)=>{
+    const seg = document.createElement('div');
+    seg.className = 'seg' + (i<curIdx?' done':'') + (i===curIdx?' current':'');
+    rail.appendChild(seg);
+  });
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+let chartInstances = [];
+function destroyCharts(){ chartInstances.forEach(c=>c.destroy()); chartInstances=[]; }
+
+function renderChart(canvas, cfg){
+  if(cfg.type==='bar'){
+    const c = new Chart(canvas, {type:'bar', data:{labels:cfg.labels, datasets:[{label:'คะแนนน้ำหนัก/จำนวน', data:cfg.data, backgroundColor:cfg.color}]},
+      options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}});
+    chartInstances.push(c);
+  } else if(cfg.type==='line'){
+    const c = new Chart(canvas, {type:'line', data:{labels:cfg.labels, datasets:[{label:'BUY Score สะสม', data:cfg.data, borderColor:cfg.color, backgroundColor:cfg.color, tension:.25, fill:false, pointRadius:5}]},
+      options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, suggestedMax:8}}}});
+    chartInstances.push(c);
+  } else if(cfg.type==='grouped'){
+    const c = new Chart(canvas, {type:'bar', data:{labels:cfg.labels, datasets:cfg.series.map(s=>({label:s.name, data:s.data, backgroundColor:s.color}))},
+      options:{scales:{y:{beginAtZero:true}}}});
+    chartInstances.push(c);
+  }
+}
+
+/* ============================= SCORING ============================= */
+function computeShowScore(){
+  let c=0; SHOW_Q.forEach((q,i)=>{ if(state.showAnswers[i]===q.correct) c++; });
+  return c/SHOW_Q.length*100;
+}
+function learnTaskScore(t, ans){
+  // returns 0..1 for one task
+  if(t.type==='blocks'){
+    if(!Array.isArray(ans)) return 0;
+    let ok=0;
+    t.slots.forEach((s,i)=>{ if(ans[i]===s.ans) ok++; });
+    return ok/t.slots.length;
+  }
+  return ans===t.correct ? 1 : 0;
+}
+function learnTaskWeight(t){ return t.type==='blocks' ? 2 : 1; }
+function computeLearnScore(){
+  let got=0, total=0;
+  LEARN_TASKS.forEach((t,i)=>{
+    const w = learnTaskWeight(t);
+    total += w;
+    got += w * learnTaskScore(t, state.learnAnswers[i]);
+  });
+  return total? got/total*100 : 0;
+}
+function computeApplyScore(){
+  const vals = state.applyResults.filter(v=>v!==null);
+  if(vals.length===0) return 0;
+  const sum = vals.reduce((a,b)=>a+b,0);
+  return sum/state.applyResults.length*100;
+}
+function computeReflectScore(){
+  let pts=0;
+  state.reflectLikert.forEach(v=>{ if(v!==null) pts+=12.5; });
+  state.reflectOpen.forEach(v=>{ if(v && v.trim().length>=15) pts+=25; });
+  return pts;
+}
+function computeOverall(show,learn,apply,reflect){
+  return show*0.10 + learn*0.40 + apply*0.35 + reflect*0.15;
+}
+function qualityLevel(overall){
+  if(overall>=85) return {n:4,label:"ระดับ 4 — Advanced (เชี่ยวชาญ)", color:"#3F7A4E"};
+  if(overall>=70) return {n:3,label:"ระดับ 3 — Proficient (ชำนาญ)", color:"#2E5266"};
+  if(overall>=50) return {n:2,label:"ระดับ 2 — Basic (พื้นฐาน)", color:"#B8862D"};
+  return {n:1,label:"ระดับ 1 — Needs Improvement (ต้องพัฒนา)", color:"#B0463D"};
+}
+
+/* ============================= RENDERERS ============================= */
+function render(){
+  updateTopbar();
+  destroyCharts();
+  const s = $('#screen'); s.innerHTML='';
+  const map = {intro:renderIntro, show:renderShow, learn:renderLearn, apply:renderApply, reflect:renderReflect, report:renderReport};
+  map[state.screen]();
+}
+
+function renderIntro(){
+  const wrap = el(`<div class="card">
+    <div class="eyebrow"><span class="dot"></span>ATM RiskGuard Series · แบบฝึกฝนเทียบเคียง PISA 2025 LDW</div>
+    <h1 class="section-title" style="font-size:26px;">Chatbot RiskGuard — มั่นคงวัสดุภัณฑ์</h1>
+    <p class="subtitle">ปัจจุบันมีการสร้างปัญญาประดิษฐ์เพื่อจัดการด้านธุรกิจ การทำกิจการค้าด้วยระบบออนไลน์ แชทบอทจึงเป็นทางเลือกที่ธุรกิจต่าง ๆ นำมาใช้บริการลูกค้าที่ต้องการข้อมูลสินค้า การรับคำสั่งซื้อ สรุปจำนวนสินค้า ประเภทสินค้า ระบบการขนส่งสินค้า และบริการอื่น โดย AI Chatbot จะทำงานทดแทนเสมือนได้พูดคุยสนทนากับลูกค้าเสมือนพนักงานที่เป็นมนุษย์จริง และพร้อมที่จะรับรู้แม้การสนทนาจะมีการป้อนคำผิดพลาด ใช้ภาษาไม่เป็นทางการ ใช้ภาษาพูด การใช้ภาษาถิ่นเพื่อสื่อสาร AI Chatbot ก็ยังมีความสามารถในการประมวลผลได้ตรงตามความต้องการของผู้สนทนา และโต้ตอบได้อย่างถูกต้อง ในฐานะคณะผู้พัฒนา AI Chatbot นี้ คุณจะต้องดำเนินการปรับค่าพารามิเตอร์ สิ่งแวดล้อมให้กับระบบ AI Chatbot ให้ทำงานได้ตรงตามวัตถุประสงค์ของลูกค้า ให้การสนทนาราบรื่น บริการประทับใจมากที่สุด</p>
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-status"><span>9:41</span><span>5G ▂▄▆ 🔋</span></div>
+      <div class="phone-head">
+        <div class="avatar">🏗️</div>
+        <div><div class="pname">มั่นคงวัสดุภัณฑ์</div><div class="pstat">● ออนไลน์ 24 ชม.</div></div>
+      </div>
+      <div class="phone-body">
+        <div class="msg me">ปูนถุงละกี่บาทครับ<span class="t">09:41</span></div>
+        <div class="msg bot">ตรวจพบ Intent<span class="intent-tag">PRICE</span></div>
+        <div class="msg me">มีปูนก่อขายบ่<span class="t">09:42</span></div>
+        <div class="msg bot">ตรวจพบ Intent<span class="intent-tag">PRODUCT</span></div>
+        <div class="msg me">เอาปูนก่อ 5 ถุงครับ<span class="t">09:43</span></div>
+        <div class="msg bot">ตรวจพบ Intent<span class="intent-tag">BUY</span></div>
+      </div>
+      <div class="phone-input"><div class="fake-input">พิมพ์ข้อความ...</div><div class="send">➤</div></div>
+    </div>
+    <div class="stripe"></div>
+    <div class="field">
+      <label class="field-label">ชื่อผู้เข้าสอบ</label>
+      <input type="text" id="nameInput" placeholder="พิมพ์ชื่อ-นามสกุล" value="${escapeHtml(state.name)}">
+    </div>
+    <div class="field">
+      <label class="field-label">ระดับชั้น</label>
+      <select id="gradeInput">
+        <option value="">— เลือกระดับชั้น —</option>
+        ${GRADE_OPTIONS.map(g=>`<option value="${g}" ${state.grade===g?'selected':''}>${g}</option>`).join('')}
+      </select>
+    </div>
+    <div class="teach-box">ใช้เวลาประมาณ 30 นาที แบ่งเป็น 4 ขั้นตอน: <b>SHOW</b> วัดความรู้เดิม → <b>LEARN</b> เรียนรู้ทีละภาระงานพร้อมกราฟ → <b>APPLY</b> ลงมือปรับพารามิเตอร์จริง → <b>REFLECT</b> ประเมินตนเอง ระบบจะยังไม่เฉลยผลระหว่างทำ แต่จะสรุปรายงานให้เมื่อทำครบทุกขั้นตอน</div>
+    <div class="btn-row" style="justify-content:flex-end;">
+      <button class="btn" id="startBtn">เริ่มทำแบบทดสอบ</button>
+    </div>
+  </div>`);
+  $('#screen').appendChild(wrap);
+  $('#startBtn').onclick = ()=>{
+    const name = $('#nameInput').value.trim();
+    const grade = $('#gradeInput').value;
+    if(!name || !grade){ alert('กรุณากรอกชื่อและเลือกระดับชั้นก่อนเริ่มทำแบบทดสอบ'); return; }
+    state.name = name; state.grade = grade; state.screen='show'; startTimer(); render();
+  };
+}
+
+function renderMCQScreen(opts){
+  // opts: {sectionLabel, idx, total, questionText, options, selected, chartCfg, teachHtml, onSelect, onBack, onNext, nextLabel, headerTitle}
+  const wrap = el(`<div class="card">
+    <div class="eyebrow"><span class="dot"></span>${opts.sectionLabel}</div>
+    <h2 class="section-title">${opts.headerTitle}</h2>
+    <div class="qcounter">ข้อที่ ${opts.idx+1} / ${opts.total}</div>
+    ${opts.teachHtml||''}
+    ${opts.chartCfg? `<div class="chart-wrap"><canvas></canvas></div>` : ''}
+    <div class="qtext">${opts.questionText}</div>
+    <div class="options">
+      ${opts.options.map((o,i)=>`<label class="opt ${opts.selected===i?'selected':''}" data-i="${i}">
+        <input type="radio" name="opt" ${opts.selected===i?'checked':''}>
+        <span>${o}</span></label>`).join('')}
+    </div>
+    <div class="btn-row">
+      <button class="btn secondary" id="backBtn" ${opts.idx===0 && !opts.allowBackAtZero ? 'style="visibility:hidden"':''}>ย้อนกลับ</button>
+      <button class="btn" id="nextBtn" ${opts.selected===null?'disabled':''}>${opts.nextLabel}</button>
+    </div>
+  </div>`);
+  $('#screen').appendChild(wrap);
+  if(opts.chartCfg){ renderChart(wrap.querySelector('canvas'), opts.chartCfg); }
+  wrap.querySelectorAll('.opt').forEach(o=>{
+    o.onclick = ()=>{ opts.onSelect(parseInt(o.dataset.i)); };
+  });
+  wrap.querySelector('#backBtn').onclick = opts.onBack;
+  wrap.querySelector('#nextBtn').onclick = ()=>{ if(opts.selected!==null) opts.onNext(); };
+}
+
+function renderShow(){
+  const i = state.showIdx, q = SHOW_Q[i];
+  renderMCQScreen({
+    sectionLabel:"ขั้นตอนที่ 1 · SHOW — แสดงสิ่งที่รู้",
+    headerTitle:"ตรวจสอบความรู้พื้นฐานก่อนเริ่มเรียนรู้",
+    idx:i, total:SHOW_Q.length,
+    questionText:q.q, options:q.opts, selected:state.showAnswers[i],
+    chartCfg: q.chart ? {type:'bar', labels:q.chart.labels, data:q.chart.data, color:'#2E5266'} : null,
+    nextLabel: i===SHOW_Q.length-1 ? "ไปขั้นตอน LEARN" : "ข้อถัดไป",
+    onSelect:(v)=>{ state.showAnswers[i]=v; render(); },
+    onBack:()=>{ if(i>0){state.showIdx--; render();} },
+    onNext:()=>{ if(i<SHOW_Q.length-1){ state.showIdx++; } else { state.screen='learn'; state.learnIdx=0; } render(); }
+  });
+}
+
+function renderLearn(){
+  const i = state.learnIdx, t = LEARN_TASKS[i];
+  if(t.type==='blocks'){ renderLearnBlocks(i,t); return; }
+  renderMCQScreen({
+    sectionLabel:"ขั้นตอนที่ 2 · LEARN — เรียนรู้",
+    headerTitle:t.title,
+    idx:i, total:LEARN_TASKS.length,
+    teachHtml:`<div class="teach-box">${t.teach}</div>`,
+    chartCfg:t.chart,
+    questionText:t.q, options:t.opts, selected:state.learnAnswers[i],
+    nextLabel: i===LEARN_TASKS.length-1 ? "ไปขั้นตอน APPLY" : "ภาระงานถัดไป",
+    onSelect:(v)=>{ state.learnAnswers[i]=v; render(); },
+    onBack:()=>{ if(i>0){ state.learnIdx--; } else { state.screen='show'; state.showIdx=SHOW_Q.length-1; } render(); },
+    onNext:()=>{ if(i<LEARN_TASKS.length-1){ state.learnIdx++; } else { state.screen='apply'; state.applyIdx=0; } render(); }
+  });
+}
+
+function renderLearnBlocks(i, t){
+  if(!Array.isArray(state.learnAnswers[i])) state.learnAnswers[i] = new Array(t.slots.length).fill(null);
+  const placed = state.learnAnswers[i];
+  let picked = null; // id selected by click (tap fallback)
+
+  const wrap = el(`<div class="card">
+    <div class="eyebrow"><span class="dot"></span>ขั้นตอนที่ 2 · LEARN — เรียนรู้</div>
+    <h2 class="section-title">${t.title}</h2>
+    <div class="qcounter">ข้อที่ ${i+1} / ${LEARN_TASKS.length}</div>
+    <div class="teach-box">${t.teach}</div>
+    <div class="blocks-hint">ลากบล็อกจาก “กล่องบล็อกคำสั่ง” ไปวางในช่องของ “พื้นที่ประกอบคำสั่ง” — บนมือถือใช้วิธีแตะบล็อกหนึ่งครั้ง แล้วแตะช่องที่ต้องการวาง · แตะบล็อกที่วางแล้วเพื่อนำออก</div>
+    <div class="blocks-layout">
+      <div class="palette-col">
+        <h3 class="col-head">กล่องบล็อกคำสั่ง</h3>
+        <div class="palette" id="palette"></div>
+      </div>
+      <div class="script-col">
+        <h3 class="col-head">พื้นที่ประกอบคำสั่ง</h3>
+        <div class="script" id="script"></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn secondary" id="backBtn">ย้อนกลับ</button>
+      <button class="btn" id="nextBtn">${i===LEARN_TASKS.length-1 ? "ไปขั้นตอน APPLY" : "ภาระงานถัดไป"}</button>
+    </div>
+  </div>`);
+  $('#screen').appendChild(wrap);
+
+  const paletteEl = wrap.querySelector('#palette');
+  const scriptEl = wrap.querySelector('#script');
+
+  function blockHtml(b, extraClass){
+    return `<div class="sblock ${b.kind} ${extraClass||''}" draggable="true" data-id="${b.id}">${b.text}</div>`;
+  }
+  function byId(id){ return t.blocks.find(b=>b.id===id); }
+
+  // Shuffle the palette once per task so the listed order never reveals the answer.
+  if(!t._order){
+    const arr = t.blocks.map(b=>b.id);
+    let seed = t.slots.length*7919 + t.blocks.length*104729;
+    for(let k=arr.length-1;k>0;k--){
+      seed = (seed*1103515245 + 12345) & 0x7fffffff;
+      const j = seed % (k+1);
+      [arr[k],arr[j]] = [arr[j],arr[k]];
+    }
+    t._order = arr;
+  }
+  const orderedBlocks = t._order.map(id=>t.blocks.find(b=>b.id===id));
+
+  function draw(){
+    // palette = blocks not yet placed
+    paletteEl.innerHTML = orderedBlocks
+      .filter(b=>!placed.includes(b.id))
+      .map(b=>blockHtml(b)).join('') || '<div class="empty-note">วางบล็อกครบแล้ว</div>';
+
+    scriptEl.innerHTML = t.slots.map((s,si)=>{
+      const id = placed[si];
+      const inner = id ? blockHtml(byId(id),'in-slot') : '<div class="slot-empty">วางบล็อกที่นี่</div>';
+      return `<div class="slot-row">
+        <div class="slot-label">${s.label}</div>
+        <div class="slot ${id?'filled':''} ${picked?'ready':''}" data-slot="${si}">${inner}</div>
+      </div>`;
+    }).join('');
+
+    bind();
+    const nb = wrap.querySelector('#nextBtn');
+    nb.disabled = placed.some(x=>x===null);
+  }
+
+  function place(slotIdx, blockId){
+    const prev = placed.indexOf(blockId);
+    if(prev !== -1) placed[prev] = null;      // move within script
+    placed[slotIdx] = blockId;
+    picked = null;
+    draw();
+  }
+
+  function bind(){
+    paletteEl.querySelectorAll('.sblock').forEach(b=>{
+      b.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', b.dataset.id); });
+      b.onclick = ()=>{
+        picked = (picked===b.dataset.id) ? null : b.dataset.id;
+        paletteEl.querySelectorAll('.sblock').forEach(x=>x.classList.toggle('picked', x.dataset.id===picked));
+        scriptEl.querySelectorAll('.slot').forEach(x=>x.classList.toggle('ready', !!picked));
+      };
+    });
+    scriptEl.querySelectorAll('.sblock').forEach(b=>{
+      b.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', b.dataset.id); });
+      b.onclick = (e)=>{
+        e.stopPropagation();
+        const si = placed.indexOf(b.dataset.id);
+        if(si!==-1){ placed[si]=null; picked=null; draw(); }
+      };
+    });
+    scriptEl.querySelectorAll('.slot').forEach(sl=>{
+      sl.addEventListener('dragover', e=>{ e.preventDefault(); sl.classList.add('over'); });
+      sl.addEventListener('dragleave', ()=> sl.classList.remove('over'));
+      sl.addEventListener('drop', e=>{
+        e.preventDefault(); sl.classList.remove('over');
+        const id = e.dataTransfer.getData('text/plain');
+        if(id) place(parseInt(sl.dataset.slot), id);
+      });
+      sl.onclick = ()=>{ if(picked) place(parseInt(sl.dataset.slot), picked); };
+    });
+  }
+
+  draw();
+  wrap.querySelector('#backBtn').onclick = ()=>{
+    if(i>0){ state.learnIdx--; } else { state.screen='show'; state.showIdx=SHOW_Q.length-1; }
+    render();
+  };
+  wrap.querySelector('#nextBtn').onclick = ()=>{
+    if(placed.some(x=>x===null)) return;
+    if(i<LEARN_TASKS.length-1){ state.learnIdx++; } else { state.screen='apply'; state.applyIdx=0; }
+    render();
+  };
+}
+
+function getApplyCtrlState(actIdx){
+  const act = APPLY_ACTIVITIES[actIdx];
+  if(!state.applyState[act.id]) state.applyState[act.id] = Object.assign({}, act.defaults);
+  return state.applyState[act.id];
+}
+
+function renderApply(){
+  const idx = state.applyIdx, act = APPLY_ACTIVITIES[idx];
+  const ctrl = getApplyCtrlState(idx);
+
+  const wrap = el(`<div class="card">
+    <div class="eyebrow"><span class="dot"></span>ขั้นตอนที่ 3 · APPLY — ประยุกต์ใช้</div>
+    <h2 class="section-title">${act.title}</h2>
+    <div class="qcounter">กิจกรรมที่ ${idx+1} / ${APPLY_ACTIVITIES.length}</div>
+    <p class="subtitle">${act.desc}</p>
+    <div id="controlsBox"></div>
+    <table class="msg-table">
+      <thead><tr><th>ข้อความลูกค้า</th><th>คะแนนที่คำนวณได้</th><th>Intent ที่ถูกต้อง</th><th>ระบบทำนาย</th><th></th></tr></thead>
+      <tbody id="rowsBody"></tbody>
+    </table>
+    <div class="accbar-wrap"><div class="accbar-fill" id="accFill"></div></div>
+    <div class="acc-readout"><span>ความแม่นยำปัจจุบัน</span><span id="accText"></span></div>
+    <div class="btn-row">
+      <button class="btn secondary" id="backBtn">ย้อนกลับ</button>
+      <button class="btn" id="nextBtn">${idx===APPLY_ACTIVITIES.length-1 ? "ยืนยันและไปขั้นตอน REFLECT" : "ยืนยันและไปกิจกรรมถัดไป"}</button>
+    </div>
+  </div>`);
+  $('#screen').appendChild(wrap);
+
+  let acc = 0;
+  function update(){
+    let correctCount = 0;
+    const rows = act.msgs.map(m=>{
+      const scores = act.scoreFn(m, ctrl);
+      const margin = ctrl.margin!==undefined ? ctrl.margin : 0;
+      const pred = decide(scores, margin);
+      const ok = pred === m.true;
+      if(ok) correctCount++;
+      const scoreStr = Object.entries(scores).map(([k,v])=>`${k}:${v}`).join(' / ');
+      return `<tr class="${ok?'row-ok':'row-bad'}">
+        <td>${escapeHtml(m.text)}</td>
+        <td style="font-size:12px;color:var(--ink-soft);">${scoreStr}</td>
+        <td><span class="pill ${m.true}">${m.true}</span></td>
+        <td><span class="pill ${pred}">${pred}</span></td>
+        <td>${ok?'✅':'❌'}</td></tr>`;
+    }).join('');
+    acc = correctCount / act.msgs.length;
+    wrap.querySelector('#rowsBody').innerHTML = rows;
+    const f = wrap.querySelector('#accFill');
+    f.style.width = (acc*100).toFixed(0)+'%';
+    f.style.background = acc===1 ? 'var(--good)' : (acc>=0.7 ? '#B8862D' : 'var(--bad)');
+    wrap.querySelector('#accText').textContent = `${correctCount} / ${act.msgs.length} (${(acc*100).toFixed(1)}%)`;
+  }
+
+  const cbox = wrap.querySelector('#controlsBox');
+  act.controls.forEach(c=>{
+    const row = el(`<div class="control">
+      <div class="control-head"><span>${c.l}</span><span class="val">${ctrl[c.k]}</span></div>
+      <input type="range" min="${c.min}" max="${c.max}" step="${c.step}" value="${ctrl[c.k]}">
+    </div>`);
+    cbox.appendChild(row);
+    const input = row.querySelector('input'), val = row.querySelector('.val');
+    const handler = (e)=>{
+      ctrl[c.k] = parseFloat(e.target.value);
+      val.textContent = ctrl[c.k];
+      update();
+    };
+    input.addEventListener('input', handler);
+    input.addEventListener('change', handler);
+  });
+  update();
+
+  wrap.querySelector('#backBtn').onclick = ()=>{
+    if(idx>0){ state.applyIdx--; } else { state.screen='learn'; state.learnIdx=LEARN_TASKS.length-1; }
+    render();
+  };
+  wrap.querySelector('#nextBtn').onclick = ()=>{
+    state.applyResults[idx] = acc;
+    if(idx<APPLY_ACTIVITIES.length-1){ state.applyIdx++; } else { state.screen='reflect'; }
+    render();
+  };
+}
+
+function renderReflect(){
+  const wrap = el(`<div class="card">
+    <div class="eyebrow"><span class="dot"></span>ขั้นตอนที่ 4 · REFLECT — ประเมินตนเอง</div>
+    <h2 class="section-title">สะท้อนคิดเกี่ยวกับการออกแบบระบบ Intent</h2>
+    <p class="subtitle">ให้คะแนนความเห็นด้วยกับข้อความต่อไปนี้ และตอบคำถามปลายเปิดด้วยความคิดเห็นของตนเอง</p>
+    <div id="likertBox"></div>
+    <div class="stripe"></div>
+    <div id="openBox"></div>
+    <div class="btn-row">
+      <button class="btn secondary" id="backBtn">ย้อนกลับ</button>
+      <button class="btn" id="submitBtn">ส่งคำตอบและดูรายงานผล</button>
+    </div>
+  </div>`);
+  $('#screen').appendChild(wrap);
+
+  const lb = wrap.querySelector('#likertBox');
+  REFLECT_LIKERT.forEach((stmt,i)=>{
+    const row = el(`<div class="likert-row">
+      <div class="likert-stmt">${i+1}. ${stmt}</div>
+      <div class="likert-scale">
+        ${LIKERT_LABELS.map((lab,v)=>`<div class="likert-opt ${state.reflectLikert[i]===v?'selected':''}" data-i="${i}" data-v="${v}">${lab}</div>`).join('')}
+      </div>
+    </div>`);
+    lb.appendChild(row);
+  });
+  lb.querySelectorAll('.likert-opt').forEach(o=>{
+    o.onclick = ()=>{ state.reflectLikert[parseInt(o.dataset.i)] = parseInt(o.dataset.v); render(); };
+  });
+
+  const ob = wrap.querySelector('#openBox');
+  REFLECT_OPEN.forEach((q,i)=>{
+    const row = el(`<div class="field">
+      <label class="field-label">${i+5}. ${q}</label>
+      <textarea data-i="${i}" placeholder="พิมพ์คำตอบของนักเรียน...">${escapeHtml(state.reflectOpen[i])}</textarea>
+    </div>`);
+    ob.appendChild(row);
+  });
+  ob.querySelectorAll('textarea').forEach(t=>{
+    t.oninput = (e)=>{ state.reflectOpen[parseInt(t.dataset.i)] = e.target.value; };
+  });
+
+  wrap.querySelector('#backBtn').onclick = ()=>{ state.screen='apply'; state.applyIdx=APPLY_ACTIVITIES.length-1; render(); };
+  wrap.querySelector('#submitBtn').onclick = ()=>{
+    const allLikert = state.reflectLikert.every(v=>v!==null);
+    if(!allLikert){ alert('กรุณาตอบข้อความให้ครบทุกข้อก่อนส่งคำตอบ'); return; }
+    state.screen='report'; stopTimer(); render(); saveResult();
+  };
+}
+
+function renderReport(){
+  const show = computeShowScore(), learn = computeLearnScore(), apply = computeApplyScore(), reflect = computeReflectScore();
+  const overall = computeOverall(show,learn,apply,reflect);
+  const lvl = qualityLevel(overall);
+
+  const wrap = el(`<div class="card">
+    <div class="eyebrow"><span class="dot"></span>ขั้นตอนที่ 5 · รายงานผล</div>
+    <h2 class="section-title">สรุปผลการทำแบบทดสอบ</h2>
+    <p class="subtitle">${escapeHtml(state.name)} · ${escapeHtml(state.grade)}</p>
+    <div class="score-grid">
+      <div class="score-box"><div class="n">${show.toFixed(0)}</div><div class="l">SHOW (10%)</div></div>
+      <div class="score-box"><div class="n">${learn.toFixed(0)}</div><div class="l">LEARN (40%)</div></div>
+      <div class="score-box"><div class="n">${apply.toFixed(0)}</div><div class="l">APPLY (35%)</div></div>
+      <div class="score-box"><div class="n">${reflect.toFixed(0)}</div><div class="l">REFLECT (15%)</div></div>
+    </div>
+    <div class="chart-wrap"><canvas id="reportChart"></canvas></div>
+    <div class="level-banner" style="background:${lvl.color}">
+      <div>คะแนนรวม ${overall.toFixed(1)} / 100</div>
+      <div class="lv">${lvl.label}</div>
+    </div>
+    <div class="save-status" id="saveStatus">${state.saveMsg}</div>
+    <div id="historyBox"></div>
+    <div class="btn-row" style="justify-content:center;">
+      <button class="btn secondary" id="restartBtn">เริ่มทำแบบทดสอบใหม่</button>
+    </div>
+  </div>`);
+  $('#screen').appendChild(wrap);
+  renderChart(wrap.querySelector('#reportChart'), {type:'bar', labels:['SHOW','LEARN','APPLY','REFLECT'], data:[show,learn,apply,reflect], color:'#E1611B'});
+  wrap.querySelector('#restartBtn').onclick = ()=>{
+    Object.assign(state, {screen:'intro', name:'', grade:'', showIdx:0, showAnswers:[null,null,null,null,null],
+      learnIdx:0, learnAnswers:[null,null,null,null,null,null,null], applyIdx:0, applyResults:[null,null,null,null,null],
+      applyState:{}, reflectLikert:[null,null,null,null], reflectOpen:['',''], saving:false, saveMsg:'', history:[]});
+    resetTimer(); render();
+  };
+  renderHistory(wrap.querySelector('#historyBox'));
+}
+
+/* ============================= SAVE / HISTORY ============================= */
+async function saveResult(){
+  const show = computeShowScore(), learn = computeLearnScore(), apply = computeApplyScore(), reflect = computeReflectScore();
+  const overall = computeOverall(show,learn,apply,reflect);
+  const lvl = qualityLevel(overall);
+  const payload = {
+    action:'save',
+    timestamp: new Date().toISOString(),
+    name: state.name,
+    grade: state.grade,
+    showScore: show.toFixed(1),
+    learnScore: learn.toFixed(1),
+    applyScore: apply.toFixed(1),
+    reflectScore: reflect.toFixed(1),
+    overallScore: overall.toFixed(1),
+    quality: lvl.label
+  };
+  state.saveMsg = 'กำลังบันทึกผล...';
+  const statusEl = document.getElementById('saveStatus');
+  if(statusEl) statusEl.textContent = state.saveMsg;
+  try{
+    await fetch(WEBAPP_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) });
+    state.saveMsg = 'บันทึกผลเรียบร้อยแล้ว';
+  }catch(e){
+    state.saveMsg = 'บันทึกผลไม่สำเร็จ (ตรวจสอบการเชื่อมต่อ) — ผลของนักเรียนยังแสดงอยู่ด้านบน';
+  }
+  const s2 = document.getElementById('saveStatus');
+  if(s2) s2.textContent = state.saveMsg;
+  loadHistory();
+}
+
+async function loadHistory(){
+  try{
+    const res = await fetch(`${WEBAPP_URL}?action=history&name=${encodeURIComponent(state.name)}`);
+    const data = await res.json();
+    state.history = Array.isArray(data) ? data : (data.rows || []);
+  }catch(e){ state.history = []; }
+  const box = document.getElementById('historyBox');
+  if(box) renderHistory(box);
+}
+
+function renderHistory(box){
+  if(!box) return;
+  if(!state.history || state.history.length===0){ box.innerHTML=''; return; }
+  box.innerHTML = `<h3 style="font-size:15px;margin-top:22px;">ประวัติการทำแบบทดสอบของ ${escapeHtml(state.name)}</h3>
+  <table class="hist-table">
+    <thead><tr><th>วันเวลา</th><th>SHOW</th><th>LEARN</th><th>APPLY</th><th>REFLECT</th><th>รวม</th><th>ระดับ</th></tr></thead>
+    <tbody>
+      ${state.history.map(r=>`<tr>
+        <td>${escapeHtml(r.timestamp||'')}</td><td>${escapeHtml(r.showScore||'')}</td><td>${escapeHtml(r.learnScore||'')}</td>
+        <td>${escapeHtml(r.applyScore||'')}</td><td>${escapeHtml(r.reflectScore||'')}</td><td>${escapeHtml(r.overallScore||'')}</td><td>${escapeHtml(r.quality||'')}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+/* ============================= TIMER ============================= */
+const EXAM_SECONDS = 30*60;
+let timerStart = null, timerHandle = null;
+function fmtTime(s){ s=Math.max(0,s); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+function tickTimer(){
+  if(!timerStart) return;
+  const left = EXAM_SECONDS - Math.floor((Date.now()-timerStart)/1000);
+  const v = document.getElementById('timerVal'), box = document.getElementById('timerBox');
+  if(v) v.textContent = fmtTime(left);
+  if(box){ box.classList.toggle('warn', left<=300 && left>60); box.classList.toggle('over', left<=60); }
+}
+function startTimer(){
+  stopTimer(); timerStart = Date.now(); tickTimer();
+  timerHandle = setInterval(tickTimer, 1000);
+}
+function stopTimer(){ if(timerHandle){ clearInterval(timerHandle); timerHandle=null; } }
+function resetTimer(){ stopTimer(); timerStart=null; const v=document.getElementById('timerVal'); if(v) v.textContent=fmtTime(EXAM_SECONDS); const b=document.getElementById('timerBox'); if(b) b.className='timer'; }
+
+/* ============================= INIT ============================= */
+render();
+</script>
+</body>
+</html>
